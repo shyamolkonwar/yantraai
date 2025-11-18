@@ -1,0 +1,150 @@
+_format_version: "3.0"
+
+_transform: true
+
+services:
+  - name: auth-v1-open
+    url: http://supabase-auth:9999/verify
+    routes:
+      - name: auth-v1-open
+        paths: ["/auth/v1/verify"]
+        strip_path: false
+
+  - name: auth-v1-open-callback
+    url: http://supabase-auth:9999/callback
+    routes:
+      - name: auth-v1-open-callback
+        paths: ["/auth/v1/callback"]
+        strip_path: false
+
+  - name: auth-v1-open-authorize
+    url: http://supabase-auth:9999/authorize
+    routes:
+      - name: auth-v1-open-authorize
+        paths: ["/auth/v1/authorize"]
+        strip_path: false
+
+  - name: auth-v1-open-token
+    url: http://supabase-auth:9999/token
+    routes:
+      - name: auth-v1-open-token
+        paths: ["/auth/v1/token"]
+        strip_path: false
+
+  - name: auth-v1-open-recover
+    url: http://supabase-auth:9999/recover
+    routes:
+      - name: auth-v1-open-recover
+        paths: ["/auth/v1/recover"]
+        strip_path: false
+
+  - name: auth-v1-open-user
+    url: http://supabase-auth:9999/user
+    routes:
+      - name: auth-v1-open-user
+        paths: ["/auth/v1/user"]
+        strip_path: false
+
+  - name: auth-v1-open-settings
+    url: http://supabase-auth:9999/settings
+    routes:
+      - name: auth-v1-open-settings
+        paths: ["/auth/v1/settings"]
+        strip_path: false
+
+  - name: rest-v1
+    url: http://supabase-rest:3000/
+    routes:
+      - name: rest-v1
+        paths: ["/rest/v1/"]
+        strip_path: true
+
+  - name: realtime-v1
+    url: http://supabase-realtime:4000/socket/
+    routes:
+      - name: realtime-v1
+        paths: ["/realtime/v1/"]
+        strip_path: true
+
+  - name: storage-v1
+    url: http://supabase-storage:5000/
+    routes:
+      - name: storage-v1
+        paths: ["/storage/v1/"]
+        strip_path: true
+
+  - name: functions-v1
+    url: http://supabase-edge-functions:9000/
+    routes:
+      - name: functions-v1
+        paths: ["/functions/v1/"]
+        strip_path: true
+
+consumers:
+  - username: anon
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+
+  - username: service_role
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+
+plugins:
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+      headers: ["accept", "authorization", "content-type", "apikey", "x-client-info"]
+      exposed_headers: ["content-length"]
+      credentials: true
+      max_age: 86400
+    service: rest-v1
+
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+      headers: ["accept", "authorization", "content-type", "apikey", "x-client-info"]
+      exposed_headers: ["content-length"]
+      credentials: true
+      max_age: 86400
+    service: storage-v1
+
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+      headers: ["accept", "authorization", "content-type", "apikey", "x-client-info"]
+      exposed_headers: ["content-length"]
+      credentials: true
+      max_age: 86400
+    service: functions-v1
+
+  - name: key-auth
+    service: rest-v1
+
+  - name: key-auth
+    service: storage-v1
+
+  - name: key-auth
+    service: functions-v1
+
+  - name: jwt
+    config:
+      secret_is_base64: false
+    service: rest-v1
+
+  - name: jwt
+    config:
+      secret_is_base64: false
+    service: storage-v1
+
+  - name: jwt
+    config:
+      secret_is_base64: false
+    service: functions-v1
+
+access_rules: []
+
+# Admin API doesn't need CORS or JWT plugins
+admin_api_logging: true
