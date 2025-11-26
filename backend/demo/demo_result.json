@@ -1,0 +1,222 @@
+{
+  "job_id": "ae027439-99c4-4ad7-9b33-b80940158aa6",
+  "status": "done",
+  "document_type": "prescription",
+  "pages": 1,
+  "fields": [
+    {
+      "region_id": "region_1",
+      "page": 1,
+      "bbox": [
+        10,
+        10,
+        200,
+        40
+      ],
+      "label": "clinic_name",
+      "raw_text": "WHITE TUSK MEDICAL CENTER",
+      "ocr_conf": 0.95,
+      "normalized_text": "WHITE TUSK MEDICAL CENTER",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_2",
+      "page": 1,
+      "bbox": [
+        10,
+        50,
+        200,
+        70
+      ],
+      "label": "doctor_name",
+      "raw_text": "Dr. Rajesh Kumar, MBBS, MD",
+      "ocr_conf": 0.95,
+      "normalized_text": "Dr. Rajesh Kumar, MBBS, MD",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_3",
+      "page": 1,
+      "bbox": [
+        10,
+        80,
+        100,
+        100
+      ],
+      "label": "patient_name",
+      "raw_text": "Name: Priya Sharma",
+      "ocr_conf": 0.95,
+      "normalized_text": "Priya Sharma",
+      "trans_conf": 1.0,
+      "pii": [
+        {
+          "type": "PERSON",
+          "span": [
+            6,
+            18
+          ],
+          "confidence": 0.95
+        }
+      ],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_4",
+      "page": 1,
+      "bbox": [
+        10,
+        110,
+        100,
+        130
+      ],
+      "label": "date",
+      "raw_text": "Date: 15/11/2024",
+      "ocr_conf": 0.95,
+      "normalized_text": "15/11/2024",
+      "trans_conf": 1.0,
+      "pii": [
+        {
+          "type": "DATE",
+          "span": [
+            6,
+            16
+          ],
+          "confidence": 0.95
+        }
+      ],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_5",
+      "page": 1,
+      "bbox": [
+        10,
+        140,
+        200,
+        160
+      ],
+      "label": "medicine_name",
+      "raw_text": "Augmentin 625mg",
+      "ocr_conf": 0.95,
+      "normalized_text": "Augmentin 625mg",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_6",
+      "page": 1,
+      "bbox": [
+        10,
+        170,
+        200,
+        190
+      ],
+      "label": "medicine_name",
+      "raw_text": "Enzoflam Tablet",
+      "ocr_conf": 0.95,
+      "normalized_text": "Enzoflam Tablet",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_7",
+      "page": 1,
+      "bbox": [
+        10,
+        200,
+        200,
+        220
+      ],
+      "label": "medicine_name",
+      "raw_text": "Paracetamol 500mg - SOS",
+      "ocr_conf": 0.95,
+      "normalized_text": "Paracetamol 500mg - SOS",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_8",
+      "page": 1,
+      "bbox": [
+        10,
+        230,
+        200,
+        250
+      ],
+      "label": "instructions",
+      "raw_text": "After meals 1-0-1",
+      "ocr_conf": 0.95,
+      "normalized_text": "After meals 1-0-1",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_9",
+      "page": 1,
+      "bbox": [
+        10,
+        260,
+        200,
+        280
+      ],
+      "label": "additional_instructions",
+      "raw_text": "Take plenty of fluids. Halka bhojan (light food). Avoid cold items. \u0926\u0935\u093e \u0938\u092e\u092f \u092a\u0930 \u0932\u0947\u0902 (Take medicine on time).",
+      "ocr_conf": 0.95,
+      "normalized_text": "Take plenty of fluids. Halka bhojan (light food). Avoid cold items. Dawa samay par le (Take medicine on time).",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    },
+    {
+      "region_id": "region_10",
+      "page": 1,
+      "bbox": [
+        10,
+        290,
+        100,
+        310
+      ],
+      "label": "doctor_signature",
+      "raw_text": "Dr. Rajesh",
+      "ocr_conf": 0.95,
+      "normalized_text": "Dr. Rajesh",
+      "trans_conf": 1.0,
+      "pii": [],
+      "trust_score": 0.95,
+      "human_verified": false,
+      "verified_value": null
+    }
+  ],
+  "created_at": "2023-10-01T12:00:00Z",
+  "processing_meta": {
+    "layout_model": "gpt-4o-vision",
+    "ocr_model": "gpt-4o-vision",
+    "lingua_model": "gpt-4o-vision"
+  }
+}

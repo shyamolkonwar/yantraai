@@ -134,7 +134,7 @@ class PIIDetectionService:
 
     def _detect_with_presidio(self, text: str) -> List[Dict[str, Any]]:
         """
-        Use Presidio to detect PII entities
+        Use Presidio to detect PII entities with short-token filtering
         """
         entities = []
         try:
@@ -147,19 +147,65 @@ class PIIDetectionService:
             )
 
             for result in results:
-                entities.append({
-                    'entity_type': result.entity_type,
-                    'start': result.start,
-                    'end': result.end,
-                    'text': text[result.start:result.end],
-                    'confidence': result.score,
-                    'source': 'presidio'
-                })
+                entity_text = text[result.start:result.end]
+                confidence = result.score
+
+                # Apply short-token filtering for PERSON entities
+                if result.entity_type == 'PERSON':
+                    confidence = self._adjust_person_confidence(entity_text, confidence, text, result.start, result.end)
+
+                # Only include if confidence is above threshold
+                if confidence >= 0.3:  # Minimum threshold
+                    entities.append({
+                        'entity_type': result.entity_type,
+                        'start': result.start,
+                        'end': result.end,
+                        'text': entity_text,
+                        'confidence': confidence,
+                        'source': 'presidio'
+                    })
 
         except Exception as e:
             print(f"Presidio detection failed: {e}")
 
         return entities
+
+    def _adjust_person_confidence(self, entity_text: str, base_confidence: float, full_text: str, start: int, end: int) -> float:
+        """
+        Adjust confidence for PERSON entities based on token length and context
+        """
+        text_length = len(entity_text.strip())
+
+        # Very short tokens (< 4 chars) need strong context
+        if text_length < 4:
+            # Check for contextual keywords within 50 characters
+            context_window = 50
+            context_start = max(0, start - context_window)
+            context_end = min(len(full_text), end + context_window)
+            context = full_text[context_start:context_end].lower()
+
+            context_keywords = [
+                'mr', 'mrs', 'ms', 'dr', 'prof', 'sir', 'madam',
+                'patient', 'name', 'नाम', 'रोगी', 'patient name',
+                'doctor', 'नाम', 'पेशेंट'
+            ]
+
+            has_context = any(keyword in context for keyword in context_keywords)
+
+            if has_context:
+                # Boost confidence if context is present
+                return min(base_confidence * 1.2, 0.8)
+            else:
+                # Significantly reduce confidence for short tokens without context
+                return base_confidence * 0.3
+
+        # Short tokens (4-6 chars) get moderate penalty
+        elif text_length < 7:
+            return base_confidence * 0.7
+
+        # Normal tokens (>= 7 chars) keep original confidence
+        else:
+            return base_confidence
 
     def _detect_with_indic_ner(self, text: str) -> List[Dict[str, Any]]:
         """

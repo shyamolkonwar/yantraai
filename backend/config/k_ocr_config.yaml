@@ -1,0 +1,186 @@
+# K-OCR v2.0 Configuration
+
+# Model Selection and Paths
+models:
+  printed:
+    # Pre-trained model: microsoft/trocr-base-printed
+    model_name: "microsoft/trocr-base-printed"
+    model_path: "models/ocr/trocr_base_printed"
+    device: "cpu"  # Options: "cuda", "cpu"
+    fp16: false    # Use half-precision for faster inference (GPU only)
+    cache_model: true  # Keep model in memory
+    
+  handwritten:
+    # Pre-trained model: microsoft/trocr-large-handwritten
+    model_name: "microsoft/trocr-large-handwritten"
+    model_path: "models/ocr/trocr_large_handwritten"
+    device: "cpu"
+    fp16: false
+    cache_model: true
+
+# Text Type Classification
+text_classifier:
+  method: "rule_based"  # Options: "rule_based", "cnn"
+  cnn_model_path: "models/ocr/text_classifier.pt"  # Only if method=cnn
+  cnn_enabled: false  # Set to true after training
+  
+  # Rule-based parameters
+  edge_density_threshold: 0.12
+  stroke_variance_threshold: 4.0
+  vertical_variance_threshold: 6.0
+
+# Multi-Track Configuration
+multi_track:
+  # Confidence thresholds
+  confidence_threshold: 0.70  # When to attempt fallback
+  text_type_detection_threshold: 0.75  # When to commit to one model
+  
+  # Processing options
+  fallback_enabled: true  # Enable alternate model if primary fails
+  try_both_models: false  # Run both models always (slower, more accurate)
+  model_priority: "printed"  # Which model to try first if uncertain
+  
+  # Batch processing
+  batch_size: 1
+  max_workers: 4
+  timeout_per_region: 5.0  # seconds
+  
+  # Logging
+  log_model_switches: true
+  log_detailed_confidence: true
+
+# Post-Processing Configuration
+post_processing:
+  # IndicBERT for error correction
+  indicbert:
+    model_path: "models/ocr/indicbert_base"
+    model_name: "ai4bharat/IndicBERT"
+    enabled: true
+    
+    # Correction parameters
+    correction_enabled: true
+    correction_threshold: 0.80  # Confidence needed to apply correction
+    mask_low_confidence_tokens: true
+    low_confidence_token_threshold: 0.75
+    
+    # Language support
+    supported_languages: ["en", "hi", "ta", "te", "ml", "kn", "bn"]
+    default_language: "en"
+  
+  # Dictionary-based corrections
+  dictionaries:
+    enabled: true
+    directory: "dictionaries/"
+    files:
+      medical_en: "medical_terms_en.txt"
+      medical_hi: "medical_terms_hi.txt"
+      medical_hinglish: "medical_terms_hinglish.txt"
+      logistics_en: "logistics_terms_en.txt"
+      hinglish_common: "common_hinglish_words.txt"
+    
+    # Correction strategy
+    unknown_word_action: "flag_for_review"  # Options: "flag", "accept", "query_user"
+  
+  # Domain-specific corrections
+  domain:
+    medical:
+      enabled: true
+      abbreviations:
+        "mg": "milligrams"
+        "ml": "milliliters"
+        "bd": "twice daily"
+        "tid": "three times daily"
+        "qd": "once daily"
+        "tab": "tablet"
+        "pc": "after meals"
+        "ac": "before meals"
+      
+      validation:
+        check_medication_names: false  # Requires medication database
+        medication_db: "data/medications.json"
+        flag_unknown_medications: true
+    
+    logistics:
+      enabled: true
+      abbreviations:
+        "ptr": "parcel tracking reference"
+        "qty": "quantity"
+      
+      validation:
+        validate_pincode: true
+        pincode_format: "^\\d{6}$"
+        validate_phone: true
+        phone_format: "^\\d{10}$"
+  
+  # Hinglish handling
+  hinglish:
+    enabled: true
+    preserve_bilingual: true  # Keep Hinglish as-is instead of transliterating
+    detect_code_mixing: true
+    normalize_transliteration: false
+    
+    # Scripts to support
+    scripts:
+      - "latin"
+      - "devanagari"
+      - "tamil"
+      - "telugu"
+      - "kannada"
+      - "malayalam"
+      - "bengali"
+
+# Confidence Scoring
+confidence_scoring:
+  # Component weights (must sum to 1.0)
+  weights:
+    ocr_confidence: 0.50
+    language_model_confidence: 0.20
+    dictionary_match: 0.15
+    pattern_validation: 0.15
+  
+  # Thresholds for review routing
+  thresholds:
+    high_confidence: 0.85  # Auto-accept
+    good_confidence: 0.75  # Light review
+    moderate_confidence: 0.60  # Full review
+    low_confidence: 0.00  # Manual correction required
+  
+  # Penalties
+  model_switch_penalty: 0.10
+  unknown_word_penalty: 0.05  # Per unknown word (accumulates)
+  pattern_mismatch_penalty: 0.10
+  
+  # Field-specific overrides
+  field_overrides:
+    date:
+      ocr_confidence: 0.40  # Dates are critical
+      pattern_validation: 0.30
+    phone:
+      ocr_confidence: 0.35
+      pattern_validation: 0.35
+    amount:
+      ocr_confidence: 0.35
+      pattern_validation: 0.35
+
+# Performance Optimization
+performance:
+  gpu_memory_optimizations: true
+  use_quantized_models: false  # Set true for lower memory usage
+  cache_models_in_memory: true
+  prefetch_next_batch: false
+  num_threads: 4
+
+# Monitoring & Logging
+monitoring:
+  enable_metrics: true
+  enable_detailed_logging: true
+  log_file: "logs/k_ocr.log"
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  
+  # Track these metrics
+  track_metrics:
+    - "processing_time_per_region"
+    - "confidence_distribution"
+    - "model_switch_rate"
+    - "correction_rate"
+    - "review_queue_rate"

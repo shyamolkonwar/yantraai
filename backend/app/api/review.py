@@ -2,9 +2,30 @@ from fastapi import APIRouter, HTTPException
 import os
 import json
 from typing import List
+from pydantic import BaseModel
+from datetime import datetime
 
-from app.schemas import ReviewItem, ReviewCorrection
 from app.utils import get_all_jobs
+
+class PIIEntity(BaseModel):
+    type: str
+    span: List[int]
+    confidence: float
+
+class ReviewItem(BaseModel):
+    job_id: str
+    region_id: str
+    page: int
+    bbox: List[float]
+    raw_text: str
+    normalized_text: str
+    trust_score: float
+    pii: List[PIIEntity]
+
+class ReviewCorrection(BaseModel):
+    user: str
+    verified_value: str
+    timestamp: datetime = datetime.now()
 
 router = APIRouter()
 

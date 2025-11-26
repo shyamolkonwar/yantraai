@@ -1,0 +1,188 @@
+# K-Eval Configuration (Deep Ensembles + Temperature Scaling)
+
+# Ensemble Configuration
+ensemble:
+  num_models: 8
+  method: "deep_ensemble"  # Independent trainings with different seeds
+  
+  seeds:
+    - 42
+    - 123
+    - 456
+    - 789
+    - 1000
+    - 2000
+    - 3000
+    - 4000
+  
+  aggregation:
+    method: "variance_weighted"  # "mean", "median", "variance_weighted"
+    variance_penalty: 0.15  # How much to penalize uncertainty
+    
+  # Uncertainty quantification
+  uncertainty:
+    separate_epistemic_aleatoric: true
+    use_ensemble_variance: true
+    estimate_data_uncertainty: true
+
+# Temperature Scaling Calibration
+calibration:
+  method: "temperature_scaling"
+  
+  # Pre-computed optimal T values
+  optimal_temperatures:
+    global: 1.0  # Apply to all (will be calibrated)
+    medical: 1.0  # Domain-specific if needed
+    logistics: 1.0
+  
+  # Validation
+  validation_on_holdout: true
+  target_ece: 0.02  # 2% Expected Calibration Error
+  
+  # Recalibration schedule
+  recalibrate_frequency: "monthly"
+  recalibration_data_size: 1000
+
+# Confidence Scoring
+confidence_scoring:
+  # Component weights for aggregation
+  weights:
+    ocr: 0.40
+    lingua: 0.35
+    comply: 0.25
+  
+  # Anomaly detection
+  apply_anomaly_penalty: true
+  anomaly_penalty: 0.15  # Reduce confidence if anomaly
+  
+  # OOD detection
+  apply_ood_penalty: true
+  ood_penalty: 0.15
+  ood_detection_method: "ensemble_variance"
+
+# Selective Classification (Reject Option)
+selective_classification:
+  enabled: true
+  
+  # Confidence thresholds (tuned on validation data)
+  thresholds:
+    auto_accept: 0.90       # HIGH confidence
+    light_review: 0.80      # GOOD confidence
+    full_review: 0.70       # MODERATE confidence
+    manual_correction: 0.00  # LOW confidence (< 0.70)
+  
+  # Risk-coverage tradeoff
+  target_coverage: 0.92  # Accept 92% of documents (reject 8%)
+  target_risk: 0.05     # Acceptable error rate: 5%
+  
+  # Domain-specific overrides
+  domain_overrides:
+    medical:
+      auto_accept: 0.95  # Stricter for medical
+      light_review: 0.85
+    
+    logistics:
+      auto_accept: 0.85  # More lenient for logistics
+      light_review: 0.75
+
+# Review Routing
+review_routing:
+  # Tier definitions
+  tiers:
+    auto_accept:
+      name: "AUTO_ACCEPT"
+      confidence_range: [0.90, 1.0]
+      manual_review: false
+      review_percentage: 0.0
+      description: "High confidence, no review needed"
+    
+    light_review:
+      name: "LIGHT_REVIEW"
+      confidence_range: [0.80, 0.90]
+      manual_review: true
+      review_percentage: 10.0  # Spot check 10%
+      description: "Good confidence, 10% spot check"
+    
+    full_review:
+      name: "FULL_REVIEW"
+      confidence_range: [0.70, 0.80]
+      manual_review: true
+      review_percentage: 100.0  # Review all
+      description: "Moderate confidence, review all"
+    
+    manual_correction:
+      name: "MANUAL_CORRECTION"
+      confidence_range: [0.0, 0.70]
+      manual_review: true
+      review_percentage: 100.0
+      description: "Low confidence, manual extraction"
+
+# Performance Metrics
+metrics:
+  # Track during validation
+  track_metrics:
+    - "Expected Calibration Error (ECE)"
+    - "Maximum Calibration Error (MCE)"
+    - "Brier Score"
+    - "Negative Log Likelihood (NLL)"
+    - "Coverage @ 5% Risk"
+    - "Risk @ 80% Coverage"
+  
+  # Calibration metrics
+  calibration:
+    use_ece: true
+    use_mce: true
+    num_bins: 10
+  
+  # Monitoring
+  monitoring:
+    track_confidence_distribution: true
+    track_routing_distribution: true
+    alert_if_ece_exceeds: 0.05  # Alert if ECE > 5%
+    alert_if_coverage_below: 0.80  # Alert if accepting <80%
+
+# Data Quality Checks
+data_quality:
+  check_component_correlations: true
+  flag_if_all_components_high: true
+  flag_if_all_components_low: true
+
+# Explainability & Transparency
+explainability:
+  log_confidence_breakdown: true
+  log_component_contributions: true
+  log_routing_reason: true
+  include_uncertainty_sources: true
+
+# Production Monitoring
+monitoring:
+  enable_live_metrics: true
+  
+  # Track these metrics in production
+  production_metrics:
+    - "avg_confidence_per_day"
+    - "routing_distribution"  # % AUTO_ACCEPT vs LIGHT_REVIEW, etc
+    - "user_correction_rate"  # % of LIGHT_REVIEW that needed correction
+    - "ece_drift"  # ECE on production data vs validation
+  
+  # Alert thresholds
+  alerts:
+    high_manual_correction_rate: 0.25  # Alert if >25% manual
+    low_auto_accept_rate: 0.50  # Alert if <50% auto-accepted
+    ece_drift: 0.03  # Alert if ECE drifts >0.03
+
+# Retraining Strategy
+retraining:
+  schedule: "monthly"
+  
+  # Data for retraining
+  data_source: "production"
+  samples_per_batch: 1000
+  
+  # Validation strategy
+  validate_before_deploy: true
+  a_b_test_duration: "1 week"  # Test new model on 10% traffic
+  
+  # Rollback if needed
+  rollback_if_ece_worse: true
+  rollback_if_coverage_drops: true

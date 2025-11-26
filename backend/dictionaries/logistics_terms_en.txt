@@ -1,0 +1,43 @@
+invoice
+waybill
+shipment
+delivery
+tracking
+parcel
+package
+consignment
+freight
+cargo
+sender
+receiver
+consignee
+origin
+destination
+weight
+dimensions
+quantity
+pincode
+address
+phone
+mobile
+email
+reference
+tracking number
+awb
+airway bill
+pod
+proof of delivery
+signature
+date
+time
+courier
+logistics
+warehouse
+hub
+transit
+dispatch
+received
+delivered
+pending
+in transit
+out for delivery

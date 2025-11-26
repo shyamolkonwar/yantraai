@@ -11,14 +11,8 @@ from app.core.database import SessionLocal
 from app.models.job import Job, JobStatus
 from app.models.page import Page
 from app.models.region import Region
+from app.services.orchestrator_v2 import DocumentProcessorV2
 from app.services.storage import StorageService
-from app.services.ocr import OCRService
-from app.services.layout import LayoutService
-from app.services.text_normalization import TextNormalizationService
-from app.services.pii_detection import PIIDetectionService
-from app.services.trust_score import TrustScoreService
-from app.services.pdf_redaction import PDFRedactionService
-from app.services.table_extraction import TableExtractionService
 from app.crud.job import job_crud
 
 

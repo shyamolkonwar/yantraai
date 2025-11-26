@@ -189,6 +189,15 @@ backend/logs/
 frontend_phase.txt
 backend_phase.txt
 new_backend_phase.txt
+backend_fix.txt
+backend_fix1.txt
+backend_solution.txt
 
 ##Testing folders
 testing
+
+# Models (ignore all contents but keep folder structure)
+backend/models/**
+
+# Documentation (ignore all contents but keep folder structure)
+documentation/**

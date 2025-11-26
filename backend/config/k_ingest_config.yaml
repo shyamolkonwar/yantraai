@@ -1,0 +1,76 @@
+# K-Ingest v2.0 Configuration
+
+acquisition:
+  pdf_dpi: 300
+  min_resolution: [800, 600]
+  max_file_size_mb: 50
+  supported_formats: [".pdf", ".png", ".jpg", ".jpeg"]
+
+preprocessing:
+  denoise:
+    enabled: true
+    h: 10
+    template_window_size: 7
+    search_window_size: 21
+  
+  deskew:
+    enabled: true
+    angle_threshold: 0.5  # degrees
+    interpolation: "INTER_CUBIC"
+  
+  contrast_enhancement:
+    enabled: true
+    clip_limit: 2.0
+    tile_grid_size: [8, 8]
+  
+  padding:
+    enabled: true
+    border_size: 10
+    border_color: [255, 255, 255]
+
+layout_detection:
+  model_path: "models/layout/doclayout_yolo_docstructbench_imgsz1024.pt"
+  device: "cpu"  # "cuda" or "cpu"
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+  inference_size: 1024
+  fp16: false  # Set to true for GPU inference
+  
+  class_names:
+    0: "Header"
+    1: "Text"
+    2: "Table"
+    3: "Handwritten"
+    4: "Stamp"
+    5: "Signature"
+    6: "Date"
+    7: "Address"
+    8: "Amount"
+    9: "Logo"
+    10: "Footer"
+    11: "Form-Field"
+
+region_extraction:
+  context_padding: 10
+  min_region_size: [20, 20]
+  
+  type_specific_preprocessing:
+    handwritten:
+      binarization: true
+      additional_denoise: true
+    table:
+      grid_enhancement: true
+    text:
+      none: true
+
+validation:
+  min_detections: 0  # Allow 0 for blank pages
+  max_detections: 500
+  enable_quality_checks: true
+  save_debug_images: false
+  debug_output_dir: "data/debug/k_ingest"
+
+performance:
+  batch_size: 1  # Process N images simultaneously
+  num_workers: 4
+  cache_models: true

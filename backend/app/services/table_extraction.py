@@ -1,9 +1,6 @@
 import cv2
 import numpy as np
 from typing import List, Dict, Any, Optional
-import camelot
-import tabula
-import pandas as pd
 
 
 class TableExtractionService:

@@ -1,0 +1,246 @@
+# K-Lingua v2.0 Configuration (IndicBERT + Aksharantar)
+
+# Language Models
+language_models:
+  indicbert:
+    model_name: "models/lingua/indicbert"  # Local path to downloaded model
+    mlm_model_name: "models/lingua/indicbert_mlm"  # Local path to MLM model
+    device: "cpu"  # "cuda" or "cpu"
+    batch_size: 32
+    max_sequence_length: 512
+    cache_model: true
+  
+  transliterator:
+    model_name: "ai4bharat/IndicXlit"
+    dataset: "Aksharantar"
+    model_path: "models/lingua/indicxlit_transliteration"
+    
+    # Runtime configuration
+    device: "cpu"
+    batch_size: 64
+    cache_model: true
+
+# Language Detection
+language_detection:
+  method: "IndicBERT"  # or "rule_based" for fallback
+  primary_threshold: 0.60  # Confidence to classify as primary language
+  secondary_threshold: 0.15  # Confidence to flag secondary language
+  detect_code_mixing: true
+  
+  # Supported languages
+  languages:
+    - code: "en"
+      name: "English"
+      scripts: ["latin"]
+    - code: "hi"
+      name: "Hindi"
+      scripts: ["devanagari"]
+    - code: "ta"
+      name: "Tamil"
+      scripts: ["tamil"]
+    - code: "te"
+      name: "Telugu"
+      scripts: ["telugu"]
+    - code: "ml"
+      name: "Malayalam"
+      scripts: ["malayalam"]
+    - code: "kn"
+      name: "Kannada"
+      scripts: ["kannada"]
+    - code: "bn"
+      name: "Bengali"
+      scripts: ["bengali"]
+    - code: "mr"
+      name: "Marathi"
+      scripts: ["devanagari"]
+    - code: "gu"
+      name: "Gujarati"
+      scripts: ["gujarati"]
+    - code: "pa"
+      name: "Punjabi"
+      scripts: ["gurmukhi"]
+
+# Error Correction (Masked Language Modeling)
+error_correction:
+  enabled: true
+  method: "masked_language_model"
+  
+  # Token-level correction
+  confidence_threshold: 0.75  # OCR confidence below this triggers correction
+  mlm_prediction_threshold: 0.85  # IndicBERT confidence to accept prediction
+  
+  # Context window for MLM
+  context_window: 10  # tokens before and after
+  consider_full_sentence: true
+  
+  # Domain knowledge
+  use_dictionary_validation: true
+  dictionary_path: "dictionaries/"
+
+# Transliteration
+transliteration:
+  enabled: true
+  preserve_bilingual: true  # Keep both scripts, don't convert
+  
+  # When to transliterate
+  cases:
+    code_mixing_detected: true
+    low_confidence_devanagari: true
+    user_preference: false  # Only if user requests
+  
+  # Language-specific pairs
+  language_pairs:
+    - from: "hindi_devanagari"
+      to: "hindi_roman"
+      model: "aksharantar_hi"
+      accuracy_target: 0.95
+    
+    - from: "tamil_tamil"
+      to: "tamil_roman"
+      model: "aksharantar_ta"
+      accuracy_target: 0.94
+    
+    - from: "telugu_telugu"
+      to: "telugu_roman"
+      model: "aksharantar_te"
+      accuracy_target: 0.94
+
+# Code-Mixing (Hinglish) Handling
+code_mixing:
+  enabled: true
+  preserve_original: true  # Preserve bilingual content
+  
+  # Detection sensitivity
+  threshold: 0.10  # Secondary language score to flag as mixed
+  
+  # Handling strategies
+  strategies:
+    preserve_bilingual: "Transliterate all scripts to Roman, preserve meaning"
+    detect_boundaries: "Identify which words from which language"
+
+# Domain-Specific Normalization
+domains:
+  medical:
+    enabled: true
+    
+    # Abbreviation expansion
+    abbreviations:
+      enabled: true
+      
+      examples:
+        "BD": "twice daily"
+        "OD": "once daily"
+        "TDS": "three times daily"
+        "AC": "before meals"
+        "PC": "after meals"
+        "HS": "at bedtime"
+        "Tab": "tablet"
+        "Cap": "capsule"
+        "mg": "milligrams"
+        "ml": "milliliters"
+    
+    # Dosage validation
+    dosage_validation:
+      enabled: true
+      max_single_dose_mg: 500
+      max_daily_dose_mg: 2000
+      max_frequency_per_day: 4
+      warn_if_exceeds: true
+  
+  logistics:
+    enabled: true
+    
+    # Address normalization
+    address_normalization:
+      enabled: true
+      validate_pincode: true
+      standardize_format: true
+    
+    # Tracking code formatting
+    tracking_code:
+      enabled: true
+      remove_extra_spaces: true
+      validate_checksum: true
+      standardize_format: true
+
+# Cross-Field Consistency Checking
+consistency_checking:
+  enabled: true
+  
+  fields_to_monitor:
+    - "patient_name"
+    - "dates"
+    - "dosages"
+    - "amounts"
+    - "phone_numbers"
+    - "addresses"
+  
+  validation_rules:
+    patient_name_consistency:
+      enabled: true
+      allow_abbreviations: true
+      allow_middle_name_variation: true
+    
+    date_format_consistency:
+      enabled: true
+      standardize_to: "ISO"  # 2025-01-01
+      flag_if_inconsistent: true
+    
+    amount_format_consistency:
+      enabled: true
+      standardize_decimals: true
+      standardize_currency: true
+
+# Confidence Scoring
+confidence_scoring:
+  # Component weights (must sum to 1.0)
+  weights:
+    ocr_confidence: 0.40        # K-OCR confidence
+    correction_confidence: 0.25 # Quality of corrections
+    dictionary_match: 0.20      # % words recognized
+    domain_validation: 0.10     # Domain-specific checks
+    language_coherence: 0.05    # Language consistency
+  
+  # Thresholds for review routing
+  thresholds:
+    high_confidence: 0.90    # AUTO_ACCEPT
+    good_confidence: 0.80    # LIGHT_REVIEW
+    moderate_confidence: 0.70 # FULL_REVIEW
+    low_confidence: 0.00     # MANUAL_CORRECTION
+
+# Performance Optimization
+performance:
+  gpu_memory_optimization: true
+  use_quantized_models: false  # Set true for lower memory (lower accuracy)
+  cache_models_in_memory: true
+  prefetch_next_batch: true
+  num_workers: 4
+  timeout_per_text: 5.0  # seconds
+
+# Fallback & Error Handling
+fallback:
+  enabled: true
+  
+  # If IndicBERT fails
+  fallback_method: "rule_based"  # Revert to v1.0 rules
+  
+  # Retry logic
+  max_retries: 2
+  retry_on_timeout: true
+
+# Monitoring & Logging
+monitoring:
+  enable_metrics: true
+  log_corrections: true
+  log_transliterations: true
+  log_confidence_scores: true
+  
+  metrics_to_track:
+    - "correction_rate"
+    - "transliteration_success_rate"
+    - "average_confidence"
+    - "code_mixing_detection_rate"
+    - "review_queue_rate"
+  
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/k_lingua.log"
